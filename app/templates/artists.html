@@ -1,0 +1,44 @@
+{% extends "index.html" %}
+
+{% block title %}Исполнители{% endblock %}
+
+{% block content %}
+<div class="container">
+    {% if search_form %}
+        <form method="POST" action="" style="margin-left: auto; margin-right: auto; width: 90%;">
+                <div class="form-group">
+                    {{ search_form.csrf_token() }}
+                    <label for=""> {{ search_form.title.label }}</label>
+                    {{ search_form.title }}
+                    {{ search_form.submit(class="btn btn-primary") }}
+                </div>
+        </form>
+        {% if task_id %}<a class="btn btn-info" href="{{ url_for('status_view' ,task_id=task_id) }}" role="button">Статус задания получения данных</a>{% endif %}
+    {% endif %}
+    <h3>Список:</h3>
+    {% if pagination %}{{ pagination.links }}{% endif %}
+    {% if artists_data %}
+    <table class="table table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">ИД</th>
+                <th scope="col">Название</th>
+                <th scope="col">Изображение</th>
+                <th scope="col">Альбомы</th>
+            </tr>
+        </thead>
+    {% for row in artists_data %}
+        <tr>
+            <td>{{ row[0] }}</td>
+            <td><a href="{{ url_for('artist_view', artist_id=row[0]) }}">{{ row[1] }}</a></td>
+            <td><img src="{{ row[2] }}" class="img-fluid" alt="{{ row[1] }}"></td>
+            <td><strong>{{ row[3] }}</strong></td>
+        </tr>
+    {% endfor %}
+    </table>
+    {% else %}
+        Список пуст
+    {% endif %}
+    {% if pagination %}{{ pagination.links }}{% endif %}
+</div>
+{% endblock %}

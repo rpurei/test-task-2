@@ -1,0 +1,60 @@
+version: "3"
+
+services:
+  web:
+    container_name: web-projectthree
+    build: ./app
+    ports:
+      - "80:80"
+    expose:
+      - '80'
+    links:
+      - redis
+    depends_on:
+      - redis
+      - db
+    volumes:
+      - ./app:/app
+
+  redis:
+    container_name: redis
+    image: redis:5.0.5
+    hostname: redis
+    ports:
+      - "6379:6379"
+
+  worker:
+    build:
+      context: ./app
+    hostname: worker
+    entrypoint: celery
+    command: -A celery_tasks.celery worker --loglevel=info
+    volumes:
+      - ./app:/app
+    links:
+      - redis
+    depends_on:
+      - redis
+      - db
+
+  flower:
+    build: ./app
+    command: celery -A celery_tasks.celery flower
+    volumes:
+      - ./app:/app
+    working_dir: /app
+    ports:
+      - 5555:5555
+    depends_on:
+      - worker
+      - redis
+
+  db:
+    image: mysql:5.7
+    ports:
+      - "32000:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_HOST: '%'
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d/:ro
